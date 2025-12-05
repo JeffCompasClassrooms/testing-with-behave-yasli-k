@@ -17,25 +17,29 @@ jobs:
         with:
           python-version: "3.11"
 
-      # These are the ONLY versions that work together in CI
       - name: Install dependencies
         run: |
           pip install selenium==3.141.0 behave==1.2.6 behave-webdriver==0.3.1
 
-      # Install latest Chrome + matching modern Chromedriver (works with Selenium 3)
-      - name: Install Chrome + Chromedriver
+      - name: Install Chrome + correct Chromedriver (2025 working version)
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | cut -d " " -f3 | cut -d "." -f1-3)
-          wget -q "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}" -O /tmp/version
-          DRIVER_VERSION=$(cat /tmp/version)
-          wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
-          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/
-          sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+
+          # Get exact Chrome version (e.g. 142.0.7444.175)
+          FULL_VERSION=$(google-chrome --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+
+          # Download matching Chromedriver from Chrome for Testing
+          wget -q "https://storage.googleapis.com/chrome-for-testing-public/${FULL_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
+
+          # Extract — in 2025, it extracts directly to 'chromedriver'
+          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/ || \
+          sudo unzip -j /tmp/driver.zip "chromedriver" -d /usr/local/bin/
+
+          # Make sure it's named 'chromedriver' and executable
+          sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver 2>/dev/null || true
           sudo chmod +x /usr/local/bin/chromedriver
 
-      # Run each project separately → no hook conflicts
       - name: Run is_it_christmas tests
         env:
           BEHAVE_WEBDRIVER_HEADLESS: 1
