@@ -25,6 +25,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
+          # Fetch latest Chromedriver version from official JSON
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
           wget -O /tmp/versions.json "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}"
           DRIVER_VERSION=$(cat /tmp/versions.json)
@@ -37,5 +38,4 @@ jobs:
       - name: Run Behave in headless mode
         env:
           BEHAVE_WEBDRIVER_HEADLESS: "1"
-        run: |
-          behave --no-capture -D steps_dir=.
+        run: behave isitchristmas/features peppers-ghost/features --no-capture
