@@ -1,9 +1,8 @@
 import behave_webdriver
-import os
+from behave_webdriver.steps import *
 
 def before_all(context):
-    headless = os.getenv('HEADLESS', 'false').lower() == 'true'
-    context.behave_driver = behave_webdriver.Chrome(headless=headless)
+    context.behave_driver = behave_webdriver.Chrome()
 
 def after_all(context):
     context.behave_driver.quit()
