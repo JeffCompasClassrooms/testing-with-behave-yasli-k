@@ -19,17 +19,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.3.1
+          pip install selenium==3.141.0 behave==1.2.6 behave-webdriver==0.3.1
 
-      - name: Install Chrome + Chromedriver
+      - name: Install Chrome + Chromedriver (compatible with Selenium 3.x)
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
           CHROME_VERSION=$(google-chrome --version | cut -d " " -f3 | cut -d "." -f1-3)
-          wget -q "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}" -O /tmp/version
-          DRIVER_VERSION=$(cat /tmp/version)
-          wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
-          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/
+          wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip" -O /tmp/driver.zip
+          sudo unzip -j /tmp/driver.zip chromedriver -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Run is_it_christmas tests
