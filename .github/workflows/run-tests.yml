@@ -17,12 +17,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Use the ONLY version combination that works perfectly in CI
-      - name: Install working versions
+      - name: Install dependencies
         run: |
-          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.2.4
+          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.3.1
 
-      - name: Install Chrome + matching Chromedriver
+      - name: Install Chrome + Chromedriver
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
@@ -33,8 +32,7 @@ jobs:
           sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
 
-      # THIS IS THE MAGIC: run each project separately so environment.py works
-      - name: Run isitchristmas tests
+      - name: Run is_it_christmas tests
         env:
           BEHAVE_WEBDRIVER_HEADLESS: 1
         run: |
