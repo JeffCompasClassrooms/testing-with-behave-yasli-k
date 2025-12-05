@@ -19,37 +19,27 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install selenium==3.141.0 behave==1.2.6 behave-webdriver==0.3.1
+          pip install selenium==3.141.0 behave==1.2.6
 
-      - name: Install Chrome + correct Chromedriver (2025 working version)
+      - name: Install Chrome + Chromedriver
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
-
-          # Get exact Chrome version (e.g. 142.0.7444.175)
           FULL_VERSION=$(google-chrome --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
-
-          # Download matching Chromedriver from Chrome for Testing
           wget -q "https://storage.googleapis.com/chrome-for-testing-public/${FULL_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
-
-          # Extract — in 2025, it extracts directly to 'chromedriver'
-          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/ || \
+          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/ 2>/dev/null || \
           sudo unzip -j /tmp/driver.zip "chromedriver" -d /usr/local/bin/
-
-          # Make sure it's named 'chromedriver' and executable
           sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver 2>/dev/null || true
           sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Run is_it_christmas tests
-        env:
-          BEHAVE_WEBDRIVER_HEADLESS: 1
+      - name: Run is_it_christmas tests (headless forced in code)
         run: |
           cd isitchristmas/features
+          python -c "import pathlib, sys; p=pathlib.Path('environment.py'); txt=p.read_text(); p.write_text(txt.replace('behave_webdriver.Chrome()', 'behave_webdriver.Chrome(headless=True)'))"
           behave --no-capture
 
-      - name: Run peppers-ghost tests
-        env:
-          BEHAVE_WEBDRIVER_HEADLESS: 1
+      - name: Run peppers-ghost tests (headless forced in code)
         run: |
           cd ../../peppers-ghost/features
+          python -c "import pathlib, sys; p=pathlib.Path('environment.py'); txt=p.read_text(); p.write_text(txt.replace('behave_webdriver.Chrome()', 'behave_webdriver.Chrome(headless=True)'))"
           behave --no-capture
