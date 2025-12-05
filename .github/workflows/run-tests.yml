@@ -19,7 +19,7 @@ jobs:
 
       - name: Install compatible dependencies
         run: |
-          pip install behave==1.2.5 selenium behave-webdriver==0.1.0
+          pip install behave==1.2.5 selenium==3.141.0 behave-webdriver==0.1.0
 
       - name: Install Chrome + Chromedriver + xvfb
         run: |
