@@ -17,24 +17,33 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      # Use the ONLY version combination that works perfectly in CI
+      - name: Install working versions
         run: |
-          pip install selenium behave-webdriver behave==1.2.6
+          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.2.4
 
-      - name: Install Chrome + Chromedriver (headless)
+      - name: Install Chrome + matching Chromedriver
         run: |
-          sudo apt-get update
+          sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          wget -O /tmp/versions.json "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}"
-          DRIVER_VERSION=$(cat /tmp/versions.json)
-          wget -O /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
-          sudo unzip /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/local/bin/
-          sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          CHROME_VERSION=$(google-chrome --version | cut -d " " -f3 | cut -d "." -f1-3)
+          wget -q "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}" -O /tmp/version
+          DRIVER_VERSION=$(cat /tmp/version)
+          wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
+          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
-          rm /tmp/chromedriver.zip /tmp/versions.json
 
-      - name: Run Behave in headless mode
+      # THIS IS THE MAGIC: run each project separately so environment.py works
+      - name: Run isitchristmas tests
         env:
-          BEHAVE_WEBDRIVER_HEADLESS: "1"
-        run: behave isitchristmas/features peppers-ghost/features --no-capture
+          BEHAVE_WEBDRIVER_HEADLESS: 1
+        run: |
+          cd isitchristmas/features
+          behave --no-capture
+
+      - name: Run peppers-ghost tests
+        env:
+          BEHAVE_WEBDRIVER_HEADLESS: 1
+        run: |
+          cd peppers-ghost/features
+          behave --no-capture
