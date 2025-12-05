@@ -18,6 +18,8 @@ Feature: Find out if it's Christmas or not
   Scenario: It's not Christmas (non-Dec 25)
     Then I expect that element "a" contains the text "NO"
 
+  Scenario: It's Christmas (Dec 25)
+    Then I expect that element "a" contains the text "YES"
 
   Scenario: Page has a link to GitHub
     Then I expect that element "a[href*='github']" exists

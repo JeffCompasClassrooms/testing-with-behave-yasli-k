@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      HEADLESS: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,30 +21,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.3.1
+          pip install behave selenium behave-webdriver
 
       - name: Install Chrome + Chromedriver
         run: |
-          sudo apt-get update -qq
+          sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-          FULL_VERSION=$(google-chrome --version | cut -d " " -f3)
-          wget -q "https://storage.googleapis.com/chrome-for-testing-public/${FULL_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
-          sudo unzip -j /tmp/driver.zip -d /usr/local/bin/
-          sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver 2>/dev/null || true
-          sudo chmod +x /usr/local/bin/chromedriver
+          wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/latest/linux64/chromedriver-linux64.zip
+          sudo unzip /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
 
-      - name: Run is_it_christmas tests
-        env:
-          BEHAVE_WEBDRIVER_BROWSER: chrome
-          BEHAVE_WEBDRIVER_HEADLESS: "true"
-        run: |
-          cd isitchristmas/features
-          behave --no-capture -D headless=true
-
-      - name: Run peppers-ghost tests
-        env:
-          BEHAVE_WEBDRIVER_BROWSER: chrome
-          BEHAVE_WEBDRIVER_HEADLESS: "true"
-        run: |
-          cd ../../peppers-ghost/features
-          behave --no-capture -D headless=true
+      - name: Run Behave tests
+        run: behave
