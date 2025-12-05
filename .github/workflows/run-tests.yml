@@ -19,27 +19,30 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install selenium==3.141.0 behave==1.2.6
+          pip install selenium==4.15.2 behave==1.2.6 behave-webdriver==0.3.1
 
       - name: Install Chrome + Chromedriver
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y google-chrome-stable
-          FULL_VERSION=$(google-chrome --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+          FULL_VERSION=$(google-chrome --version | cut -d " " -f3)
           wget -q "https://storage.googleapis.com/chrome-for-testing-public/${FULL_VERSION}/linux64/chromedriver-linux64.zip" -O /tmp/driver.zip
-          sudo unzip -j /tmp/driver.zip "chromedriver-linux64/chromedriver" -d /usr/local/bin/ 2>/dev/null || \
-          sudo unzip -j /tmp/driver.zip "chromedriver" -d /usr/local/bin/
+          sudo unzip -j /tmp/driver.zip -d /usr/local/bin/
           sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver 2>/dev/null || true
           sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Run is_it_christmas tests (headless forced in code)
+      - name: Run is_it_christmas tests
+        env:
+          BEHAVE_WEBDRIVER_BROWSER: chrome
+          BEHAVE_WEBDRIVER_HEADLESS: "true"
         run: |
           cd isitchristmas/features
-          python -c "import pathlib, sys; p=pathlib.Path('environment.py'); txt=p.read_text(); p.write_text(txt.replace('behave_webdriver.Chrome()', 'behave_webdriver.Chrome(headless=True)'))"
-          behave --no-capture
+          behave --no-capture -D headless=true
 
-      - name: Run peppers-ghost tests (headless forced in code)
+      - name: Run peppers-ghost tests
+        env:
+          BEHAVE_WEBDRIVER_BROWSER: chrome
+          BEHAVE_WEBDRIVER_HEADLESS: "true"
         run: |
           cd ../../peppers-ghost/features
-          python -c "import pathlib, sys; p=pathlib.Path('environment.py'); txt=p.read_text(); p.write_text(txt.replace('behave_webdriver.Chrome()', 'behave_webdriver.Chrome(headless=True)'))"
-          behave --no-capture
+          behave --no-capture -D headless=true
