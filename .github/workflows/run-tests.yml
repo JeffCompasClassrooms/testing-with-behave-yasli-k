@@ -21,17 +21,22 @@ jobs:
         run: |
           pip install behave selenium behave-webdriver
 
-      - name: Install Chrome, Chromedriver, and xvfb
+      - name: Install Chrome + Chromedriver + xvfb
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable xvfb
-          # Get FULL Chrome version (e.g., 142.0.7444.175)
           CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3)
           wget -O /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip"
           sudo unzip /tmp/chromedriver.zip chromedriver-linux64/chromedriver -d /usr/local/bin/
           sudo mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
-          rm /tmp/chromedriver.zip
 
-      - name: Run Behave tests
-        run: xvfb-run --auto-servernum behave
+      - name: Run Peppers Ghost tests
+        run: |
+          cd peppers-ghost
+          xvfb-run --auto-servernum behave
+
+      - name: Run Is It Christmas tests
+        run: |
+          cd is_it_christmas
+          xvfb-run --auto-servernum behave
