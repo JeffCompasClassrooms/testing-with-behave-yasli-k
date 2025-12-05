@@ -13,7 +13,7 @@ Feature: Peppers Ghost DIY Project – custom steps
     Then the heading "Pepper's Ghost Illusion in a Small Space" is visible
 
   Scenario: At least one picture exists
-    Then I expect that there is at least one picture
+    Then I expect that there is at least one picture there
 
   Scenario: Author name is shown
     Then the author name is displayed
